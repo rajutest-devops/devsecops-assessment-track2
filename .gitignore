@@ -1,2 +1,8 @@
 .DS_Store
 **/.DS_Store
+# Scan output files (may contain secret snippets from vulnerable code)
+01-findings/*.sarif
+01-findings/checkov-*.json
+01-findings/tfsec-*.json
+01-findings/trivy-*.json
+01-findings/gitleaks-*.json
