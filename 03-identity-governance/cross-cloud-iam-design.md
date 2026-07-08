@@ -124,7 +124,7 @@ resource "google_project_iam_custom_role" "deployer" {
 
 ---
 
-## Interview Talking Points
+## Notable Points
 
 **Q: Why not just use service account keys?**  
 > "Keys never expire — one leaked key means permanent access. Temporary credentials (1 hour) + auto-rotation limit blast radius. If a key leaks, it's only valid for 1 hour. We also get full audit trail showing who accessed what when."
