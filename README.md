@@ -8,15 +8,16 @@
 
 ## Executive Summary
 
-A security review of TerraGoat — a deliberately vulnerable multi-cloud Terraform repository spanning AWS, Azure, and GCP — identified **20 exploitable findings** across 46 `.tf` files. Four are Critical severity (CVSS 9.0+), actively exploitable with no prerequisites. The estate has no centralised detection, inconsistent logging, and hardcoded credentials in source code.
+A security review of TerraGoat — a deliberately vulnerable multi-cloud Terraform repository spanning AWS, Azure, and GCP — identified **20 exploitable findings** across 46 `.tf` files. Findings were prioritised as 6 Critical, 8 High, and 6 Medium based on exploitability and business impact. The estate has no centralised detection, inconsistent logging, and hardcoded credentials in source code.
 
 **Overall Risk Posture: HIGH**
 
-| Cloud | Critical | High | Tools Used |
-|-------|----------|------|------------|
-| AWS | 3 | 9 | Checkov, TFSec, Trivy, GitLeaks |
-| Azure | 1 | 5 | Checkov, TFSec, Trivy |
-| GCP | 0 | 2 | Checkov, TFSec, Trivy |
+| Scope | Critical | High | Medium | Tools Used |
+|-------|----------|------|--------|------------|
+| AWS | 3 | 3 | 4 | Checkov, TFSec, Trivy, GitLeaks |
+| Azure | 1 | 2 | 1 | Checkov, TFSec, Trivy |
+| GCP | 1 | 3 | 1 | Checkov, TFSec, Trivy |
+| Pipeline | 1 | 0 | 0 | Manual review + CI config analysis |
 
 ---
 
@@ -35,7 +36,7 @@ Module 01 (Findings)          <- Base input to all downstream modules
   |
   +-> Module 02 (Pipeline)          <- Catches future issues before merge/deploy
   +-> Module 03 (Identity)          <- Fixes FIND-001/002 (hardcoded keys), FIND-010 (wildcard IAM)
-  +-> Module 04 (Network)           <- Fixes FIND-008/009/012/013 (open ports, GKE exposure)
+  +-> Module 04 (Network)           <- Fixes FIND-006/007/008/012 (open remote access + GKE exposure)
   +-> Module 05 (Data Protection)   <- Fixes FIND-004/005/018 (public S3, unencrypted SQL)
   +-> Module 06 (Detection & IR)    <- Fixes FIND-011/020 (disabled logging)
   +-> Module 07 (Remediation)       <- Fix guidance for all 20 findings
@@ -57,7 +58,7 @@ Module 12 (Presentation)      <- Executive summary + slides for governance panel
 devsecops-assessment-track2/
 ├── README.md
 ├── 01-findings/
-│   ├── findings-register.md          <- 20 prioritised findings (Critical/High)
+│   ├── findings-register.md          <- 20 prioritised findings (Critical/High/Medium)
 │   ├── severity-methodology.md       <- Selection from 445+ raw Checkov failures
 │   └── [raw scan outputs]            <- checkov, tfsec, trivy, gitleaks JSONs
 ├── 02-pipeline-supply-chain/
@@ -88,7 +89,9 @@ devsecops-assessment-track2/
 │   └── resilience-dr-plan.md         <- Multi-AZ, RTO/RPO, backup, failover
 └── 12-presentation/
     ├── executive-summary.md          <- Detailed executive narrative
-    └── slides.md                     <- Presentation slides (25-min panel format)
+    ├── slides.md                     <- Presentation slides (25-min panel format)
+    ├── slides.pdf                    <- Exported presentation PDF for submission
+    └── final-submission-overview.md  <- Final overview + speaking guide
 ```
 
 ---
