@@ -1,9 +1,5 @@
 # Presentation Slides — DevSecOps Track 2 Assessment
 
-**Format:** 25-minute presentation + 20-minute Q&A  
-**Audience:** Governance panel (ITSO, CISO, Technical Lead)  
-**Convert to PDF:** Use VS Code Markdown PDF extension or `pandoc slides.md -o slides.pdf`
-
 ---
 
 ---

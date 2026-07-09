@@ -1,7 +1,7 @@
 # Network Segmentation & Zero Trust
 
 **Module:** 04 – Network & Zero Trust  
-**Findings:** FIND-008, FIND-009, FIND-012, FIND-013
+**Findings:** FIND-006, FIND-007, FIND-008, FIND-012
 
 ---
 
@@ -10,9 +10,9 @@
 | Finding | Issue | Solution | Why |
 |---------|-------|----------|-----|
 | FIND-008 | AWS port 22 (SSH) open to 0.0.0.0/0 | Restrict to specific IPs/VPC | Prevents brute force, exploit attempts from internet |
-| FIND-009 | AWS port 3389 (RDP) open to 0.0.0.0/0 | Remove or restrict to bastion host | No direct RDP from internet (lateral movement vector) |
+| FIND-006 | Azure port 3389 (RDP) open to any source | Restrict to bastion/admin CIDR only | Removes internet-exposed remote desktop path |
+| FIND-007 | Azure port 22 (SSH) open to any source | Restrict to bastion/admin CIDR only | Reduces brute-force and credential-stuffing risk |
 | FIND-012 | GKE master endpoint public | Authorized networks only | Only admin IPs can reach Kubernetes API |
-| FIND-013 | GKE no NetworkPolicies | Add ingress/egress rules | Prevent pod-to-pod lateral movement |
 
 ---
 
@@ -59,9 +59,9 @@ resource "aws_iam_role_policy" "ssm_access" {
 # Connect via: aws ssm start-session --target i-12345678
 ```
 
-**RDP Restriction (FIND-009):**
+**RDP Restriction (Azure pattern aligned with FIND-006):**
 ```hcl
-# OLD: RDP open (FIND-009)
+# OLD: RDP open to world
 resource "aws_security_group" "windows" {
   ingress {
     from_port   = 3389
@@ -138,7 +138,7 @@ resource "azurerm_network_security_group" "app_nsg" {
 **Problem (FIND-012):** GKE master public, anyone can access Kubernetes API  
 **Solution:** Authorized networks whitelist + private master option
 
-**Problem (FIND-013):** Pods can reach any other pod (no Network Policies)  
+**Problem:** Pods can reach any other pod (no Network Policies)  
 **Solution:** Deny-all NetworkPolicy, then allow only needed communication
 
 **Key Fix:**
@@ -161,7 +161,7 @@ resource "google_container_cluster" "main" {
   }
 }
 
-# Default deny-all NetworkPolicy (FIND-013)
+# Default deny-all NetworkPolicy
 resource "kubernetes_network_policy" "deny_all" {
   metadata {
     name = "deny-all"
@@ -226,6 +226,7 @@ resource "kubernetes_network_policy" "allow_frontend_to_backend" {
 | Finding | Action | Status |
 |---------|--------|--------|
 | FIND-008 | AWS SSH → restrict to corp IP or SSM | ✅ Documented |
-| FIND-009 | AWS RDP → bastion host + NSG | ✅ Documented |
+| FIND-006 | Azure RDP → restrict to bastion/admin CIDR | ✅ Documented |
+| FIND-007 | Azure SSH → restrict to bastion/admin CIDR | ✅ Documented |
 | FIND-012 | GKE master → authorized networks | ✅ Documented |
-| FIND-013 | GKE → deny-all NetworkPolicy + explicit allow | ✅ Documented |
+| Hardening Control | GKE deny-all NetworkPolicy + explicit allow | ✅ Documented |
