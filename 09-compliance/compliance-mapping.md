@@ -194,6 +194,37 @@
 
 ---
 
+## Policy-as-Code Baseline (OPA/Conftest Across 3 Clouds)
+
+To answer the brief requirement directly, one policy-as-code framework is used across AWS, Azure, and GCP Terraform: **OPA/Rego via Conftest**.
+
+### Why One Framework
+
+- Single policy language (Rego) for multi-cloud guardrails.
+- Same control intent tested pre-merge for all providers.
+- Easier governance evidence: one policy catalog, one exception workflow.
+
+### Example Cross-Cloud Guardrails
+
+| Control Intent | AWS Example | Azure Example | GCP Example |
+|---|---|---|---|
+| No public data stores | Deny public S3 | Deny Storage public endpoint | Deny GCS allUsers |
+| Encryption required | Require KMS on S3/EBS/RDS | Require TDE/CMK on SQL/Storage | Require CMEK on GCS/Cloud SQL |
+| Least privilege IAM | Deny wildcard Action/Resource | Deny subscription-wide role scope | Deny roles/owner style broad grants |
+| Logging mandatory | Require CloudTrail/control logs | Require diagnostic settings | Require GKE/Cloud Audit logging |
+
+### Execution Pattern
+
+```bash
+terraform plan -out=tfplan.binary
+terraform show -json tfplan.binary > tfplan.json
+conftest test tfplan.json -p policies/
+```
+
+**Governance note:** exceptions are tagged, time-bounded, and approved by security governance.
+
+---
+
 ## Summary
 
 ✅ Mapped all 20 findings to CIS/PCI-DSS/NIST/SOC 2  

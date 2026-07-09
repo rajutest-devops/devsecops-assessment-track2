@@ -111,6 +111,47 @@ A new secure pipeline was added: `.github/workflows/devsecops-pipeline.yml`
 The three vulnerable workflows were changed to `workflow_dispatch` (manual trigger only).
 They remain in the repo as documented evidence of the issues above and will not auto-execute.
 
+### Added Gate: SBOM + Dependency Provenance (SCA)
+
+The target pipeline includes a software composition and provenance gate before production approval.
+
+```yaml
+# SBOM generation + vulnerability gate
+- name: Generate SBOM (CycloneDX)
+     run: syft dir:. -o cyclonedx-json > sbom.json
+
+- name: SCA policy gate
+     run: |
+          grype sbom:sbom.json --fail-on high
+
+# Provenance attestation (SLSA-style)
+- name: Build provenance attestation
+     uses: actions/attest-build-provenance@v1
+     with:
+          subject-path: sbom.json
+```
+
+**Gate rule:** Block release if critical dependency CVEs are present, dependency source is untrusted, or provenance attestation is missing.
+
+### Added Gate: Protected Environment Approval Before Production
+
+The production deploy stage is approval-gated using protected environments.
+
+```yaml
+deploy-prod:
+     needs: [lint, iac-scan, secret-scan, sca-sbom]
+     environment:
+          name: production
+     permissions:
+          id-token: write
+          contents: read
+     steps:
+          - name: Deploy after approval
+               run: terraform apply -auto-approve
+```
+
+**Control intent:** Merge approval is not equivalent to deployment approval. A separate protected-environment check enforces explicit release authorization.
+
 ### Pipeline Flow
 
 ```
@@ -122,8 +163,26 @@ Push or Pull Request
         |
    [secret-scan] gitleaks (current files + full git history)
         |
+   [sca-sbom]    syft + grype + provenance attestation
+        |
+   [approval]    protected environment reviewer approval
+        |
+   [deploy-prod] OIDC deploy with temporary credentials
+        |
    Results uploaded to GitHub Security tab as SARIF
 ```
+
+### Review Depth Model for ~100 Workloads
+
+To scale governance, review depth is tiered by workload criticality and data class.
+
+| Tier | Workload Profile | Required Gates | Human Review Depth |
+|---|---|---|---|
+| Tier 0 | Internet-facing + regulated data | All gates + mandatory approval + change advisory | Security + platform + service owner |
+| Tier 1 | Internal production services | All gates + protected-env approval | Platform + service owner |
+| Tier 2 | Non-production/internal tools | Lint + IaC + secrets, optional SCA fail | Service owner only |
+
+This prevents bottlenecks while keeping strict controls where business impact is highest.
 
 ### Key Decisions
 

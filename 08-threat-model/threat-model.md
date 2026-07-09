@@ -18,6 +18,47 @@
 
 ---
 
+## Chosen Workload Threat Model (Single Workload as Required)
+
+**Chosen workload:** CI/CD-driven deployment path for an internet-facing API workload on AWS (GitHub Actions -> OIDC -> Terraform -> EKS/RDS).
+
+### Data Flow Diagram (DFD) - Chosen Workload
+
+```mermaid
+flowchart LR
+   Dev[Developer] --> Repo[GitHub Repository]
+   Repo --> CI[GitHub Actions Pipeline]
+   CI -->|OIDC token| STS[AWS STS AssumeRole]
+   STS --> TF[Terraform Apply]
+   TF --> EKS[EKS Workload]
+   TF --> RDS[RDS Database]
+   EKS --> Logs[CloudWatch / CloudTrail]
+   RDS --> Logs
+   Logs --> SIEM[Central SIEM]
+```
+
+### Workload-Specific STRIDE Focus
+
+| Threat | Workload Vector | Existing Control | Gap |
+|---|---|---|---|
+| Spoofing | Replayed CI identity token | OIDC audience and short token TTL | Token misuse window still exists during TTL |
+| Tampering | Malicious Terraform change merged | PR checks + scan gates | Reviewer fatigue for high-volume repos |
+| Repudiation | Privileged deploy action denied by user | Audit logs enabled | Session-level command provenance can still be incomplete |
+| Info Disclosure | State/secrets leakage in CI artifacts | Secret scanning + masked logs | False negatives possible in encoded/binary payloads |
+| DoS | Pipeline abuse blocks releases | Concurrency controls | Shared runners may still be exhausted |
+| EoP | Deploy role abused for broader access | Least-privilege role | Mis-scoped role updates remain possible |
+
+### Honest Residual Risk Statement
+
+At least one material threat is not fully mitigated: **trusted-pipeline compromise during valid token lifetime**. OIDC removes long-lived secrets but does not eliminate in-window misuse if a runner or build action is compromised. Residual risk remains **Medium** and requires:
+
+- hardened ephemeral runners,
+- stricter action allowlists,
+- anomaly detection on AssumeRole patterns,
+- and rapid token revocation playbooks.
+
+---
+
 ## Attack Chains by Threat Category
 
 ### Spoofing (FIND-001/002/015)

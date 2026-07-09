@@ -230,6 +230,39 @@ script: |
 
 ---
 
+## BYOK vs HYOK Strategy
+
+The target state uses BYOK by default and HYOK selectively for highly regulated datasets.
+
+| Model | Where Used | Operational Tradeoff | Recommended Scope |
+|---|---|---|---|
+| BYOK (Bring Your Own Key) | Most production data stores | Strong control with manageable ops overhead | Default for AWS/Azure/GCP data services |
+| HYOK (Hold Your Own Key) | Strict sovereignty/legal-hold datasets | Highest control but highest complexity and availability risk | Only for top-tier regulated workloads |
+
+**Decision:** BYOK baseline across clouds, HYOK only where legal/regulatory requirements demand customer-hosted key custody.
+
+## Data Classification Policy
+
+Data controls are applied by classification tier, not one-size-fits-all encryption settings.
+
+| Classification | Examples | Required Controls |
+|---|---|---|
+| Public | Marketing assets | Integrity checks, no confidential metadata |
+| Internal | Internal docs, telemetry | Encryption in transit, access logging |
+| Confidential | Customer records, billing | BYOK, strict IAM, DLP monitoring |
+| Restricted | Regulated PII/financial/legal | HYOK candidate, regional pinning, dual approval for key ops |
+
+## Data Residency and Sovereignty Controls
+
+- Data is region-pinned by policy for regulated workloads (for example EU data remains in EU regions).
+- Cross-region replication is configured within approved legal boundaries only.
+- Cross-cloud backup copies for regulated data require compliance approval and documented transfer basis.
+- Key material residency follows data residency for Restricted class workloads.
+
+**Control outcome:** resilience objectives are met without silently violating data-sovereignty requirements.
+
+---
+
 ## Notable Points
 
 **Q: Why encryption at rest AND in transit?**  

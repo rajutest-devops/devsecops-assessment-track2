@@ -109,6 +109,56 @@ logging_config {
 }
 ```
 
+---
+
+## CSPM Approach
+
+Cloud Security Posture Management is implemented as continuous policy enforcement, not periodic point-in-time scanning.
+
+| Layer | Tooling | Cadence | Action |
+|---|---|---|---|
+| IaC pre-merge | Checkov/TFSec/Conftest | Every PR | Block or flag by severity policy |
+| Runtime cloud config | Native cloud findings + aggregator | Continuous | Alert on drift from baseline |
+| Governance reporting | Central dashboard | Daily | Track MTTR, open critical findings, exception aging |
+
+**Operating model:** no critical misconfiguration remains untriaged beyond 24 hours.
+
+## Incident Walkthrough: Compromised CI Service Account
+
+### 1) Detection
+
+- Trigger: abnormal OIDC AssumeRole pattern from CI principal (new geography/time/profile).
+- Signals: CloudTrail anomaly, IAM role usage spike, unusual Terraform/API calls.
+- SLA: triage starts within 5 minutes of alert.
+
+### 2) Containment
+
+- Disable compromised pipeline identity/provider binding.
+- Revoke active sessions/tokens and freeze production deploy workflow.
+- Apply deny policy guardrail to sensitive actions (iam:CreateUser, kms:DisableKey, s3:PutBucketPolicy).
+
+### 3) Eradication
+
+- Remove malicious workflow/action references and unapproved role trust statements.
+- Rotate affected secrets and reissue trusted workload identity bindings.
+- Validate no persistence artifacts remain (backdoor IAM principals, webhook exfil paths).
+
+### 4) Recovery
+
+- Restore trusted pipeline definition from known-good commit.
+- Re-enable deploy path with temporary heightened approval requirements.
+- Run full post-recovery verification (infra drift check, permission diff, workload smoke tests).
+
+## Communication Plan: Mid-Incident vs Post-Incident
+
+| Timing | Audience | Content |
+|---|---|---|
+| Mid-incident (first 30-60 min) | ITSO/CISO/operations leads | What happened, current blast radius, containment actions, immediate business impact |
+| During containment | Service owners | Operational restrictions (deploy freeze), expected timelines |
+| Post-incident (within 24-72 hrs) | Governance panel + stakeholders | Root cause, timeline, eradication evidence, recovery validation, corrective actions |
+
+This separates fast operational communication from complete forensic reporting.
+
 **Export to BigQuery + alerts:**
 ```hcl
 resource "google_logging_project_sink" "gke_audit" {

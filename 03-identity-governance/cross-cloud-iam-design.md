@@ -124,6 +124,43 @@ resource "google_project_iam_custom_role" "deployer" {
 
 ---
 
+## Human Privileged Access (Break-Glass + JIT)
+
+Machine identity controls do not replace human privileged-access governance. This section covers emergency and time-bound admin patterns required by the brief.
+
+### Break-Glass (Emergency Access)
+
+- Two emergency admin accounts are created per cloud tenant/subscription/account.
+- Credentials are vaulted, sealed, and access is dual-approved (security lead + platform lead).
+- Use only when SSO, federation, or policy engines are unavailable.
+- Every use triggers mandatory post-incident review within 24 hours.
+
+### Time-Bound Privileged Access (JIT/PIM)
+
+- Azure: Privileged Identity Management (PIM) eligible roles, activation window 1-4 hours.
+- AWS: Privileged role assumption via IAM Identity Center with max session duration and approval workflow.
+- GCP: IAM Conditions grant temporary elevation with expiry timestamp.
+- Production admin access requires ticket reference, justification, and approver identity.
+
+### Audit and Forensics Controls
+
+- All privilege elevation events are logged to immutable audit stores.
+- Minimum retained fields: requester, approver, role, duration, ticket ID, source IP, and command history where possible.
+- Control objective: every privileged session is attributable, time-boxed, and reviewable.
+
+### Example Control Policy (Provider-Neutral)
+
+| Control | Requirement |
+|---|---|
+| Approval | At least one approver outside requester chain |
+| Session Length | Max 4 hours (default 1 hour) |
+| MFA | Mandatory before elevation |
+| Justification | Required ticket/change ID |
+| Session Recording | Required for production access |
+| Post-Use Review | Security review within 24 hours |
+
+---
+
 ## Notable Points
 
 **Q: Why not just use service account keys?**  

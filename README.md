@@ -43,11 +43,11 @@ Module 01 (Findings)          <- Base input to all downstream modules
       +-> compensating-controls.md  <- COTS constraint handling
       +-> fixed-terraform/          <- Corrected Terraform files
 
-Module 08 (Threat Model)      <- STRIDE + MITRE ATT&CK across all findings
-Module 09 (Compliance)        <- CIS / PCI-DSS / NIST CSF / SOC 2 mapping
-Module 10 (Architecture)      <- HLD + LLD + narrative (target state post-remediation)
-Module 11 (Resilience & DR)   <- RTO/RPO, backup, multi-AZ, failover
-Module 12 (Presentation)      <- Executive summary + slides for governance panel
+Module 09 (folder: 08-threat-model)   <- STRIDE + MITRE ATT&CK across all findings
+Module 10 (folder: 09-compliance)     <- CIS / PCI-DSS / NIST CSF / SOC 2 mapping
+Module 11 (folder: 10-architecture)   <- HLD + LLD + narrative (target state post-remediation)
+Module 12 (folder: 11-resilience-dr)  <- RTO/RPO, backup, multi-AZ, failover
+Module 13 (folder: 12-presentation)   <- Executive summary + slides for governance panel
 ```
 
 ---

@@ -403,3 +403,40 @@ Incident: AWS us-east-1 region completely down
 ✅ Quarterly DR drill schedule  
 ✅ Immutable S3 backups with Object Lock  
 ✅ Zero-knowledge about backup encryption keys (fully customer-managed)
+
+---
+
+## Is Cross-Cloud Failover Realistic Here?
+
+Short answer: **partially realistic for selected services, not universally realistic for all workloads**.
+
+| Workload Type | Cross-Cloud Failover Realism | Why |
+|---|---|---|
+| Stateless APIs | High | Containerized workloads and DNS failover are portable |
+| Stateful relational databases | Medium/Low | Engine/version/replication semantics differ across clouds |
+| Identity-dependent services | Medium | Federation and role mapping differ by provider |
+| Managed proprietary services | Low | Feature parity and migration paths are limited |
+
+**Practical strategy:** design for cross-region first (same cloud), cross-cloud only for business-critical slices where portability is engineered intentionally.
+
+## Recoverability from Git-Only Rebuild
+
+If an account/subscription/project is lost, Git-based recovery is strong but not complete by itself.
+
+### Recoverable from Git
+
+- Terraform infrastructure definitions.
+- Pipeline/workflow definitions.
+- Policy-as-code rules and baseline controls.
+- Application deployment manifests and environment templates.
+
+### Not Fully Recoverable from Git Alone
+
+- Runtime data (databases, object contents, queues).
+- Secrets material and key states (especially HYOK/BYOK lifecycle state).
+- Some identity/federation relationships and emergency access artifacts if not exported.
+- Forensic logs if immutable archive is not separately preserved.
+
+### Conclusion
+
+Git enables **infrastructure reconstitution**, not complete service restoration. Full disaster recovery still depends on backup data, key custody continuity, and immutable audit retention outside source control.
