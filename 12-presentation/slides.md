@@ -41,8 +41,10 @@
 
 | Severity | Count | Actively Exploitable | Time-to-Exploit |
 |----------|-------|---------------------|-----------------|
-| **Critical** | 4 | Yes | < 1 hour |
-| **High** | 16 | Likely | 1-24 hours |
+| **Critical** | 6 | Yes | < 1 hour |
+| **High** | 8 | Likely | 1-24 hours |
+| **Medium** | 6 | Possible | 1-7 days |
+| **Low** | 0 | No | N/A |
 
 **3 clouds assessed:** AWS (12 findings) · Azure (6 findings) · GCP (2 findings)  
 **4 tools used:** Checkov · TFSec · Trivy · GitLeaks  

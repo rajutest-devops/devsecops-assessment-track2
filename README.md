@@ -46,8 +46,8 @@ Module 01 (Findings)          <- Base input to all downstream modules
 Module 09 (folder: 08-threat-model)   <- STRIDE + MITRE ATT&CK across all findings
 Module 10 (folder: 09-compliance)     <- CIS / PCI-DSS / NIST CSF / SOC 2 mapping
 Module 11 (folder: 10-architecture)   <- HLD + LLD + narrative (target state post-remediation)
-Module 12 (folder: 11-resilience-dr)  <- RTO/RPO, backup, multi-AZ, failover
-Module 13 (folder: 12-presentation)   <- Executive summary + slides for governance panel
+Module 13 (folder: 11-resilience-dr)  <- RTO/RPO, backup, multi-AZ, failover
+Final Presentation (folder: 12-presentation) <- Executive summary + slides for governance panel
 ```
 
 ---

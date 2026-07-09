@@ -10,9 +10,9 @@
 
 | Severity | Count | CVSS | Active Exploit Risk | Timeline |
 |----------|-------|------|-------------------|----------|
-| **Critical** | 4 | 9.0+ | Yes (0-1 hour) | Fix immediately (24 hrs) |
-| **High** | 16 | 7.0-8.9 | Likely (1-24 hrs) | Fix within 1 week |
-| **Medium** | 0 | - | - | - |
+| **Critical** | 6 | 9.0+ | Yes (0-1 hour) | Fix immediately (24 hrs) |
+| **High** | 8 | 7.0-8.9 | Likely (1-24 hrs) | Fix within 1 week |
+| **Medium** | 6 | 4.0-6.9 | Possible (1-7 days) | Fix within 2-4 weeks |
 | **Low** | 0 | - | - | - |
 
 **Total Risk Score:** 8.6/10 (CRITICAL RISK)
@@ -25,19 +25,19 @@
 Impact/Likelihood Grid:
 
          LIKELIHOOD →
-         Low    Medium   High
+          Low    Medium   High
 I
-M   High │      │        │ CRITICAL (16)  │
+      M   High │      │        │ CRITICAL (6)   │
 P        │      │        │ (FIND-001,002, │
-A        │      │        │ 004,005,010,   │
-C        │      │        │ 014,015,018)   │
-T    Med │      │ HIGH   │ High (0)       │
-        │      │ (0)    │                │
-    Low │ LOW  │ Low    │ Unlikely (4)   │
-        │ (0)  │ (0)    │ (FIND-019)     │
+      A        │      │        │ 003,004,005)   │
+      C        │      │        │                │
+      T    Med │      │ HIGH   │ High (8)       │
+            │      │ (6)    │                │
+         Low │ LOW  │ Low    │ Unlikely (0)   │
+            │ (0)  │ (0)    │ -              │
 ```
 
-**Assessment:** 100% of findings are HIGH or CRITICAL severity
+      **Assessment:** 70% of findings are HIGH or CRITICAL severity (14/20)
 
 ---
 
