@@ -56,7 +56,7 @@
 
 ---
 
-## SLIDE 4 — Top 4 Critical Findings
+## SLIDE 4 — Top 4 of 6 Critical Findings
 
 | ID | Finding | File | Why #1 Priority |
 |----|---------|------|-----------------|
