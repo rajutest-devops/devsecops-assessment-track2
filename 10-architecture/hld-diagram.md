@@ -95,10 +95,10 @@ graph TB
     Panel -->|"Risk decisions"| SEC
 
     %% Styling
-    classDef external fill:#ffcccc,stroke:#cc0000
-    classDef identity fill:#ffe0cc,stroke:#cc6600
-    classDef cloud fill:#ccffcc,stroke:#006600
-    classDef security fill:#cce0ff,stroke:#0000cc
+    classDef external fill:#ffcccc,stroke:#cc0000,color:#111111,stroke-width:2px
+    classDef identity fill:#ffe0cc,stroke:#cc6600,color:#111111,stroke-width:2px
+    classDef cloud fill:#ccffcc,stroke:#006600,color:#111111,stroke-width:2px
+    classDef security fill:#cce0ff,stroke:#0000cc,color:#111111,stroke-width:2px
     class Dev,User,Panel external
     class EntraID,OIDC identity
     class AWSWAF,AWSALB,AWSAPP,AWSDB,AWSS3,AWSKMS cloud

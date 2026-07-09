@@ -108,11 +108,11 @@ graph TB
     SG_DB -.->|"attached to"| RDS
 
     %% Styling
-    classDef edge fill:#ffe0cc,stroke:#cc6600
-    classDef app fill:#ccffcc,stroke:#006600
-    classDef data fill:#cce0ff,stroke:#0000cc
-    classDef sec fill:#ffccff,stroke:#660066
-    classDef cicd fill:#ffffcc,stroke:#666600
+    classDef edge fill:#ffe0cc,stroke:#cc6600,color:#111111,stroke-width:2px
+    classDef app fill:#ccffcc,stroke:#006600,color:#111111,stroke-width:2px
+    classDef data fill:#cce0ff,stroke:#0000cc,color:#111111,stroke-width:2px
+    classDef sec fill:#ffccff,stroke:#660066,color:#111111,stroke-width:2px
+    classDef cicd fill:#ffffcc,stroke:#666600,color:#111111,stroke-width:2px
     class WAF,CF,ALB edge
     class EC2a,EC2b,IAMRole app
     class RDS,S3 data
